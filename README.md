@@ -1,2 +1,6 @@
 # Sudoku-solver
-Rust
+## Fun while learning rust
+
+### To-Do:
+- Generating sudoku
+- Save/Load Board

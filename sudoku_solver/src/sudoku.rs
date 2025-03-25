@@ -6,6 +6,9 @@ pub struct Sudoku {
 
 impl Sudoku {
     pub fn new(board: Vec<Vec<u8>>) -> Self {
+        if !Validator::is_valid_board(&board) {
+            panic!("Invalid board");
+        }
         Self { board }
     }
 
