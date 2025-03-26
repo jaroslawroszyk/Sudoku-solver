@@ -1,8 +1,10 @@
 use crate::validator::Validator;
+use std::fmt;
 
 pub struct Sudoku {
     board: Vec<Vec<u8>>,
 }
+
 
 impl Sudoku {
     pub fn new(board: Vec<Vec<u8>>) -> Self {
@@ -11,31 +13,6 @@ impl Sudoku {
         }
 
         Self { board }
-    }
-
-    pub fn print_board(&self) {
-        println!("+---------------------+");
-
-        for (i, row) in self.board.iter().enumerate() {
-            if i % 3 == 0 && i != 0 {
-                println!("|-------+-------+-------|");
-            }
-            print!("| ");
-            for (j, &num) in row.iter().enumerate() {
-                if j % 3 == 0 && j != 0 {
-                    print!("| ");
-                }
-                if num == 0 {
-                    print!(". ");
-                } else {
-                    print!("{} ", num);
-                }
-            }
-
-            println!("|");
-        }
-
-        println!("+---------------------+");
     }
 
     pub fn solve(&mut self) -> bool {
@@ -59,13 +36,40 @@ impl Sudoku {
     }
 }
 
+
+impl fmt::Display for Sudoku {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "+-----------------------+")?;
+
+        for (i, row) in self.board.iter().enumerate() {
+            if i % 3 == 0 && i != 0 {
+                writeln!(f, "|-------+-------+-------|")?;
+            }
+            write!(f, "| ")?;
+            for (j, &num) in row.iter().enumerate() {
+                if j % 3 == 0 && j != 0 {
+                    write!(f, "| ")?;
+                }
+                if num == 0 {
+                    write!(f, ". ")?;
+                } else {
+                    write!(f, "{} ", num)?;
+                }
+            }
+            writeln!(f, "|")?;
+        }
+
+        writeln!(f, "+-----------------------+")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::panic;
 
     #[test]
-    fn test_invalid_board_panic(){
+    fn test_invalid_board_panic() {
         let invalid_board_with_duplicates = vec![
             vec![5, 3, 5, 6, 7, 0, 0, 0, 0], // Duplicated 5's in the first row
             vec![6, 0, 0, 1, 9, 5, 0, 0, 0],

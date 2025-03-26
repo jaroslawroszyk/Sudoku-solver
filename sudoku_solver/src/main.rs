@@ -18,11 +18,11 @@ fn main() {
 
     let mut sudoku = Sudoku::new(board);
 
-    sudoku.print_board();
+    println!("{}", sudoku);
 
     if sudoku.solve() {
         println!("Solved:");
-        sudoku.print_board();
+        println!("{}", sudoku);
     } else {
         println!("No solution found");
     }
