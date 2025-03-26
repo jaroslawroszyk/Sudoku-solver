@@ -16,7 +16,13 @@ fn main() {
         vec![0, 0, 0, 0, 8, 0, 0, 7, 9],
     ];
 
-    let mut sudoku = Sudoku::new(board);
+    let mut sudoku = match Sudoku::new(board) {
+        Ok(sudoku) => sudoku,
+        Err(e) => {
+            println!("Error: {}", e);
+            return;
+        }
+    };
 
     println!("{}", sudoku);
 

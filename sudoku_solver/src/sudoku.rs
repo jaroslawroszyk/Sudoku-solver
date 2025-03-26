@@ -7,12 +7,12 @@ pub struct Sudoku {
 
 
 impl Sudoku {
-    pub fn new(board: Vec<Vec<u8>>) -> Self {
+    pub fn new(board: Vec<Vec<u8>>) -> Result<Self, String> {
         if !Validator::is_valid_board(&board) {
-            panic!("Invalid board");
+            return Err("Invalid board".to_string());
         }
 
-        Self { board }
+        Ok(Self { board })
     }
 
     pub fn solve(&mut self) -> bool {
@@ -40,7 +40,6 @@ impl Sudoku {
 impl fmt::Display for Sudoku {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "+-----------------------+")?;
-
         for (i, row) in self.board.iter().enumerate() {
             if i % 3 == 0 && i != 0 {
                 writeln!(f, "|-------+-------+-------|")?;
@@ -58,7 +57,6 @@ impl fmt::Display for Sudoku {
             }
             writeln!(f, "|")?;
         }
-
         writeln!(f, "+-----------------------+")
     }
 }
@@ -66,12 +64,11 @@ impl fmt::Display for Sudoku {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::panic;
 
     #[test]
-    fn test_invalid_board_panic() {
+    fn test_invalid_board() {
         let invalid_board_with_duplicates = vec![
-            vec![5, 3, 5, 6, 7, 0, 0, 0, 0], // Duplicated 5's in the first row
+            vec![5, 3, 5, 6, 7, 0, 0, 0, 0],
             vec![6, 0, 0, 1, 9, 5, 0, 0, 0],
             vec![0, 9, 8, 0, 0, 0, 0, 6, 0],
             vec![8, 0, 0, 0, 6, 0, 0, 0, 3],
@@ -82,12 +79,10 @@ mod tests {
             vec![0, 0, 0, 0, 8, 0, 0, 7, 9],
         ];
 
-        let result = panic::catch_unwind(|| {
-            Sudoku::new(invalid_board_with_duplicates);
-        });
-
-        assert!(result.is_err(), "Expected panic for invalid board");
+        let result = Sudoku::new(invalid_board_with_duplicates);
+        assert!(result.is_err(), "Expected error for invalid board");
     }
+
 
     #[test]
     fn test_solve() {
@@ -101,7 +96,9 @@ mod tests {
             vec![0, 6, 0, 0, 0, 0, 2, 8, 0],
             vec![0, 0, 0, 4, 1, 9, 0, 0, 5],
             vec![0, 0, 0, 0, 8, 0, 0, 7, 9],
-        ]);
+        ])
+        // .unwrap();
+        .expect("Failed to create Sudoku from valid board");
 
         let sudoku_solved = Sudoku::new(vec![
             vec![5, 3, 4, 6, 7, 8, 9, 1, 2],
@@ -113,7 +110,9 @@ mod tests {
             vec![9, 6, 1, 5, 3, 7, 2, 8, 4],
             vec![2, 8, 7, 4, 1, 9, 6, 3, 5],
             vec![3, 4, 5, 2, 8, 6, 1, 7, 9],
-        ]);
+        ])
+        // .unwrap();
+        .expect("Failed to create Sudoku from valid board");
 
         assert!(sudoku.solve());
         assert_eq!(sudoku.board, sudoku_solved.board);
