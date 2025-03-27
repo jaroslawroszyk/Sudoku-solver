@@ -5,7 +5,6 @@ pub struct Sudoku {
     board: Vec<Vec<u8>>,
 }
 
-
 impl Sudoku {
     pub fn new(board: Vec<Vec<u8>>) -> Result<Self, String> {
         if !Validator::is_valid_board(&board) {
@@ -34,8 +33,36 @@ impl Sudoku {
         }
         true
     }
-}
 
+    fn contains_non_digit(input: &str) -> bool {
+        !input.chars().all(|c| c.is_digit(10))
+    }
+
+    pub fn from_string(input: &str) -> Result<Self, String> {
+        const SUDOKU_BOARD: usize = 9 * 9;
+        if input.len() != SUDOKU_BOARD || Self::contains_non_digit(input) {
+            return Err("Invalid input string".to_string());
+        }
+
+        let board = input
+            .chars()
+            .map(|c| c.to_digit(10).unwrap() as u8)
+            .collect::<Vec<u8>>()
+            .chunks(9)
+            .map(|chunk| chunk.to_vec())
+            .collect::<Vec<Vec<u8>>>();
+
+        Self::new(board)
+    }
+
+    pub fn to_string(&self) -> String {
+        self.board
+            .iter()
+            .flatten()
+            .map(|&n| n.to_string())
+            .collect()
+    }
+}
 
 impl fmt::Display for Sudoku {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -82,7 +109,6 @@ mod tests {
         let result = Sudoku::new(invalid_board_with_duplicates);
         assert!(result.is_err(), "Expected error for invalid board");
     }
-
 
     #[test]
     fn test_solve() {
