@@ -2,23 +2,11 @@ pub struct Validator;
 
 impl Validator {
     pub fn is_valid(board: &Vec<Vec<u8>>, row: usize, col: usize, value: u8) -> bool {
-        if board[row].contains(&value) {
-            return false;
-        }
-
         for i in 0..9 {
-            if board[i][col] == value {
-                return false;
-            }
-        }
-        /*
-           for i in 0..9 {
             if board[row][i] == value || board[i][col] == value {
                 return false;
             }
         }
-        /
-        */
 
         let box_row_start = (row / 3) * 3;
         let box_col_start = (col / 3) * 3;

@@ -18,7 +18,7 @@ impl Sudoku {
         for row in 0..9 {
             for col in 0..9 {
                 if self.board[row][col] == 0 {
-                    for value in 1..10 {
+                    for value in 1..=9 {
                         if Validator::is_valid(&self.board, row, col, value) {
                             self.board[row][col] = value;
                             if self.solve() {
@@ -142,5 +142,23 @@ mod tests {
 
         assert!(sudoku.solve());
         assert_eq!(sudoku.board, sudoku_solved.board);
+    }
+
+    #[test]
+    fn test_empty_board() {
+        let empty_board = vec![
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+
+        let mut sudoku = Sudoku::new(empty_board).expect("Failed to create empty Sudoku");
+        assert!(sudoku.solve(), "Empty board should be solvable!");
     }
 }
