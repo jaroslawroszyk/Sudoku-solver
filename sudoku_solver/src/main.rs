@@ -103,9 +103,21 @@ fn test_from_multiple_board_in_json() {
 }
 
 fn main() {
-    // test_from_single_board_in_json();
-    test_from_multiple_board_in_json();
-    // test_sudoku_str_1_solution();
-    // test_with_board_1();
-    // test_with_board_2();
+    match Sudoku::from_json_file("inputs/multiple_boards.json") {
+        Ok(valid_boards) => {
+            for (i, sudoku) in valid_boards.iter().enumerate() {
+                println!("Solved Sudoku #{}:\n{}", i + 1, sudoku);
+            }
+        }
+        Err(err) => eprintln!("Error: {}", err),
+    }
 }
+
+// fn main() {
+//     // test_from_single_board_in_json();
+//     // test_from_multiple_board_in_json();
+
+//     // test_sudoku_str_1_solution();
+//     // test_with_board_1();
+//     // test_with_board_2();
+// }
