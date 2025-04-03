@@ -73,51 +73,28 @@ fn test_with_board_2() {
 }
 
 #[allow(dead_code)]
-fn test_from_single_board_in_json() {
-    let mut sudoku_boards: Vec<Sudoku> =
-        Sudoku::from_json_file("inputs/first.json").expect("JSON parsing error");
-
-    for (i, sudoku) in sudoku_boards.iter_mut().enumerate() {
-        if sudoku.solve() {
-            println!("Sudoku {} solved:", i + 1);
-            println!("{}", sudoku);
-        } else {
-            println!("Sudoku {}: No solution found", i + 1);
-        }
-    }
-}
-
-#[allow(dead_code)]
-fn test_from_multiple_board_in_json() {
-    let mut sudoku_boards: Vec<Sudoku> =
-        Sudoku::from_json_file("inputs/multiple_boards.json").expect("JSON parsing error");
-
-    for (i, sudoku) in sudoku_boards.iter_mut().enumerate() {
-        if sudoku.solve() {
-            println!("Sudoku {} solved:", i + 1);
-            println!("{}", sudoku);
-        } else {
-            println!("Sudoku {}: No solution found", i + 1);
-        }
-    }
-}
-
-fn main() {
-    match Sudoku::from_json_file("inputs/multiple_boards.json") {
+fn test_from_json_with(input_json: &str) {
+    match Sudoku::solve_sudoku_boards_from_json(input_json) {
         Ok(valid_boards) => {
-            for (i, sudoku) in valid_boards.iter().enumerate() {
-                println!("Solved Sudoku #{}:\n{}", i + 1, sudoku);
+            for sudoku in valid_boards.iter() {
+                println!("Solved Sudoku \n{}", sudoku);
             }
         }
         Err(err) => eprintln!("Error: {}", err),
     }
 }
 
-// fn main() {
-//     // test_from_single_board_in_json();
-//     // test_from_multiple_board_in_json();
+fn main() {
+    let _single_board = "inputs/first.json";
 
-//     // test_sudoku_str_1_solution();
-//     // test_with_board_1();
-//     // test_with_board_2();
-// }
+    let _multiple_boards = "inputs/multiple_boards.json";
+
+    // test_from_json_with(_single_board);
+    test_from_json_with(_multiple_boards);
+
+    // test_from_multiple_board_in_json();
+
+    // test_sudoku_str_1_solution();
+    // test_with_board_1();
+    // test_with_board_2();
+}
