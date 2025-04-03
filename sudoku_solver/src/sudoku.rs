@@ -1,7 +1,7 @@
 use crate::validator::Validator;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use serde::Deserialize;
-use std::{fmt, fs::File, io::Read};
+use std::{fmt, io::Read};
 
 #[derive(Debug, Deserialize)]
 pub struct Sudoku {
@@ -65,17 +65,34 @@ impl Sudoku {
             .collect()
     }
 
-    pub fn from_json_file(file_path: &str) -> Result<Self> {
-        let mut file = File::open(file_path).context("Failed to open the file")?;
-        let mut contents = String::new();
-        file.read_to_string(&mut contents)
-            .context("Failed to read the file")?;
+    fn open_file(file_path: &str) -> Result<String> {
+        match std::fs::File::open(file_path) {
+            Ok(mut file) => {
+                let mut contents = String::new();
+                match file.read_to_string(&mut contents) {
+                    Ok(_) => Ok(contents),
+                    Err(err) => Err(anyhow::anyhow!("Failed to read the file: {}", err)),
+                }
+            }
+            Err(err) => Err(anyhow::anyhow!("Failed to open the file: {}", err)),
+        }
+    }
 
-        let sudoku: Sudoku = serde_json::from_str(&contents).context("Failed to parse JSON")?;
+    pub fn from_json_file(file_path: &str) -> Result<Self> {
+        let contents = match Self::open_file(file_path) {
+            Ok(contents) => contents,
+            Err(err) => return Err(anyhow::anyhow!("Error reading the file: {}", err)),
+        };
+
+        let sudoku: Sudoku = match serde_json::from_str(&contents) {
+            Ok(parsed) => parsed,
+            Err(err) => return Err(anyhow::anyhow!("Failed to parse JSON: {}", err)),
+        };
 
         if !Validator::is_valid_board(&sudoku.board) {
             return Err(anyhow::anyhow!("Invalid board"));
         }
+
         Ok(sudoku)
     }
 }
