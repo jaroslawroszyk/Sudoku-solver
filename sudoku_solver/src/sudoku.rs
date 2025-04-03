@@ -1,3 +1,4 @@
+use crate::json_handler;
 use crate::validator::Validator;
 use anyhow::Result;
 use serde::Deserialize;
@@ -80,20 +81,14 @@ impl Sudoku {
     }
 
     pub fn solve_sudoku_boards_from_json(file_path: &str) -> Result<Vec<Sudoku>> {
-        let contents = Self::open_file(file_path)?;
+        let contents = json_handler::read_file(file_path)?;
 
         if contents.trim().is_empty() {
             return Err(anyhow::anyhow!("File '{}' is empty", file_path));
         }
 
-        let sudoku_boards: Vec<Sudoku> = match serde_json::from_str(&contents) {
-            Ok(parsed) => parsed,
-            Err(err) => return Err(anyhow::anyhow!("Failed to parse JSON: {}", err)),
-        };
-
-        if sudoku_boards.is_empty() {
-            return Err(anyhow::anyhow!("No Sudoku boards found in the file"));
-        }
+        let sudoku_boards: Vec<Sudoku> = json_handler::parse_sudoku_boards(&contents)
+            .map_err(|err| anyhow::anyhow!("Failed to parse Sudoku boards: {}", err))?;
 
         let mut valid_boards: Vec<Sudoku> = Vec::new();
 
@@ -103,7 +98,10 @@ impl Sudoku {
                     valid_boards.push(solved_sudoku);
                     println!("Sudoku #{} solved successfully.", i + 1);
                 } else {
-                    eprintln!("Error: Sudoku #{} is valid but unsolvable, skipping.", i + 1);
+                    eprintln!(
+                        "Error: Sudoku #{} is valid but unsolvable, skipping.",
+                        i + 1
+                    );
                 }
             } else {
                 eprintln!("Error: Sudoku #{} is invalid, skipping.", i + 1);
@@ -117,13 +115,8 @@ impl Sudoku {
         Ok(valid_boards)
     }
 
-    
     fn solve_sudoku(mut sudoku: Sudoku) -> Option<Sudoku> {
-        if sudoku.solve() {
-            Some(sudoku)
-        } else {
-            None
-        }
+        if sudoku.solve() { Some(sudoku) } else { None }
     }
 }
 
@@ -154,6 +147,8 @@ impl fmt::Display for Sudoku {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
+    use std::io::Write;
 
     #[test]
     fn test_invalid_board() {
@@ -223,5 +218,77 @@ mod tests {
 
         let mut sudoku = Sudoku::new(empty_board).expect("Failed to create empty Sudoku");
         assert!(sudoku.solve(), "Empty board should be solvable!");
+    }
+
+    fn create_temp_file(contents: &str) -> std::io::Result<String> {
+        let tmp_dir = std::env::temp_dir();
+        let file_path = tmp_dir.join("test_sudoku.json");
+        let mut file = File::create(&file_path)?;
+        file.write_all(contents.as_bytes())?;
+        Ok(file_path.to_str().unwrap().to_string())
+    }
+
+    #[test]
+    fn test_open_file_success() {
+        let contents = r#"[
+            {"board": [[5, 3, 0, 0, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0], [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3], [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6], [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5], [0, 0, 0, 0, 8, 0, 0, 7, 9]]}
+        ]"#;
+        let file_path = create_temp_file(contents).expect("Failed to create temp file");
+
+        let result = Sudoku::open_file(&file_path);
+        assert!(result.is_ok(), "Expected file to open successfully");
+    }
+
+    #[test]
+    fn test_open_file_not_found() {
+        let file_path = "/non/existent/path.json";
+        let result = Sudoku::open_file(file_path);
+        assert!(result.is_err(), "Expected error for non-existent file");
+    }
+
+    #[test]
+    fn test_empty_file() {
+        let contents = "";
+        let file_path = create_temp_file(contents).expect("Failed to create temp file");
+
+        let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
+        assert!(result.is_err(), "Expected error due to empty file");
+    }
+
+    #[test]
+    fn test_file_with_no_sudoku_boards() {
+        let contents = r#"[]"#;
+        let file_path = create_temp_file(contents).expect("Failed to create temp file");
+
+        let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
+        assert!(result.is_err(), "Expected error due to no Sudoku boards");
+    }
+
+    #[test]
+    fn test_file_with_invalid_sudoku_boards() {
+        let contents = r#"[
+            {"board": [[5, 3, 5, 6, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0], [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3], [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6], [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5], [0, 0, 0, 0, 8, 0, 0, 7, 9]]}
+        ]"#;
+        let file_path = create_temp_file(contents).expect("Failed to create temp file");
+
+        let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
+        assert!(
+            result.is_err(),
+            "Expected error due to invalid Sudoku board"
+        );
+    }
+
+    #[test]
+    fn test_solve_sudoku_boards() {
+        let contents = r#"[
+            {"board": [[5, 3, 0, 0, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0], [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3], [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6], [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5], [0, 0, 0, 0, 8, 0, 0, 7, 9]]}
+        ]"#;
+        let file_path = create_temp_file(contents).expect("Failed to create temp file");
+
+        let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
+        assert!(
+            result.is_ok(),
+            "Expected to solve Sudoku boards successfully"
+        );
     }
 }

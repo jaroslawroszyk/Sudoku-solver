@@ -1,3 +1,4 @@
+mod json_handler;
 mod sudoku;
 mod validator;
 
