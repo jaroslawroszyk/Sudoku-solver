@@ -75,6 +75,15 @@ fn test_with_board_2() {
 fn main() {
     // test_generate_board();
     // test_sudoku_str_1_solution();
-    test_with_board_1();
-    test_with_board_2();
+    // test_with_board_1();
+    // test_with_board_2();
+        let mut sudoku = Sudoku::from_json_file("inputs/first.json").expect("Błąd parsowania JSON-a");
+        if sudoku.solve() {
+            println!("Solved:");
+            println!("{}", sudoku);
+        } 
+        else {
+            println!("No solution found");
+        }
+    
 }

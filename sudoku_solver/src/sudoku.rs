@@ -1,12 +1,15 @@
 use crate::validator::Validator;
-use std::fmt;
+use std::{fmt, fs::File, io::Read};
+use serde::{ser::Error, Deserialize};
+use serde_json::Result;
 
+#[derive(Debug, Deserialize)]
 pub struct Sudoku {
     board: Vec<Vec<u8>>,
 }
 
 impl Sudoku {
-    pub fn new(board: Vec<Vec<u8>>) -> Result<Self, String> {
+    pub fn new(board: Vec<Vec<u8>>) -> std::result::Result<Self, String> {
         if !Validator::is_valid_board(&board) {
             return Err("Invalid board".to_string());
         }
@@ -38,7 +41,7 @@ impl Sudoku {
         !input.chars().all(|c| c.is_digit(10))
     }
 
-    pub fn from_string(input: &str) -> Result<Self, String> {
+    pub fn from_string(input: &str) -> std::result::Result<Self, String> {
         const SUDOKU_BOARD: usize = 9 * 9;
         if input.len() != SUDOKU_BOARD || Self::contains_non_digit(input) {
             return Err("Invalid input string".to_string());
@@ -61,6 +64,19 @@ impl Sudoku {
             .flatten()
             .map(|&n| n.to_string())
             .collect()
+    }
+
+    pub fn from_json_file(file_path: &str) -> Result<Self> {
+        let mut file = File::open(file_path).map_err(|e| serde_json::Error::custom(e.to_string()))?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)
+            .map_err(|e| serde_json::Error::custom(e.to_string()))?;
+        
+        let sudoku: Sudoku = serde_json::from_str(&contents)?;
+        if !Validator::is_valid_board(&sudoku.board) {
+            return Err(serde_json::Error::custom("Invalid board"));
+        }
+        Ok(sudoku)
     }
 }
 
