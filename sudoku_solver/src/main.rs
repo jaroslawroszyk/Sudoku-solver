@@ -72,16 +72,41 @@ fn test_with_board_2() {
     test_with_board(board);
 }
 
+#[allow(dead_code)]
+fn test_from_single_board_in_json() {
+    let mut sudoku_boards: Vec<Sudoku> =
+        Sudoku::from_json_file("inputs/first.json").expect("JSON parsing error");
+
+    for (i, sudoku) in sudoku_boards.iter_mut().enumerate() {
+        if sudoku.solve() {
+            println!("Sudoku {} solved:", i + 1);
+            println!("{}", sudoku);
+        } else {
+            println!("Sudoku {}: No solution found", i + 1);
+        }
+    }
+}
+
+
+#[allow(dead_code)]
+fn test_from_multiple_board_in_json() {
+    let mut sudoku_boards: Vec<Sudoku> =
+        Sudoku::from_json_file("inputs/multiple_boards.json").expect("JSON parsing error");
+
+    for (i, sudoku) in sudoku_boards.iter_mut().enumerate() {
+        if sudoku.solve() {
+            println!("Sudoku {} solved:", i + 1);
+            println!("{}", sudoku);
+        } else {
+            println!("Sudoku {}: No solution found", i + 1);
+        }
+    }
+}
+
 fn main() {
-    // test_generate_board();
+    test_from_single_board_in_json();
+    // test_from_multiple_board_in_json();
     // test_sudoku_str_1_solution();
     // test_with_board_1();
     // test_with_board_2();
-    let mut sudoku = Sudoku::from_json_file("inputs/first.json").expect("Błąd parsowania JSON-a");
-    if sudoku.solve() {
-        println!("Solved:");
-        println!("{}", sudoku);
-    } else {
-        println!("No solution found");
-    }
 }

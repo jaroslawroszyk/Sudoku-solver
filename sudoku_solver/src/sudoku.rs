@@ -16,6 +16,7 @@ impl Sudoku {
 
         Ok(Self { board })
     }
+
     pub fn solve(&mut self) -> bool {
         for row in 0..9 {
             for col in 0..9 {
@@ -78,22 +79,29 @@ impl Sudoku {
         }
     }
 
-    pub fn from_json_file(file_path: &str) -> Result<Self> {
+    pub fn from_json_file(file_path: &str) -> Result<Vec<Sudoku>> {
         let contents = match Self::open_file(file_path) {
             Ok(contents) => contents,
             Err(err) => return Err(anyhow::anyhow!("Error reading the file: {}", err)),
         };
 
-        let sudoku: Sudoku = match serde_json::from_str(&contents) {
+        let sudoku_boards: Vec<Sudoku> = match serde_json::from_str(&contents) {
             Ok(parsed) => parsed,
             Err(err) => return Err(anyhow::anyhow!("Failed to parse JSON: {}", err)),
         };
 
-        if !Validator::is_valid_board(&sudoku.board) {
+        if sudoku_boards.is_empty() {
+            return Err(anyhow::anyhow!("No Sudoku boards found in the file"));
+        }
+
+        if !sudoku_boards
+            .iter()
+            .all(|sudoku| Validator::is_valid_board(&sudoku.board))
+        {
             return Err(anyhow::anyhow!("Invalid board"));
         }
 
-        Ok(sudoku)
+        Ok(sudoku_boards)
     }
 }
 
