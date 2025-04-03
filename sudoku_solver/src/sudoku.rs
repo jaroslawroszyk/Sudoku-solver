@@ -1,7 +1,7 @@
 use crate::validator::Validator;
+use anyhow::{Context, Result};
+use serde::Deserialize;
 use std::{fmt, fs::File, io::Read};
-use serde::{ser::Error, Deserialize};
-use serde_json::Result;
 
 #[derive(Debug, Deserialize)]
 pub struct Sudoku {
@@ -9,14 +9,13 @@ pub struct Sudoku {
 }
 
 impl Sudoku {
-    pub fn new(board: Vec<Vec<u8>>) -> std::result::Result<Self, String> {
+    pub fn new(board: Vec<Vec<u8>>) -> Result<Self> {
         if !Validator::is_valid_board(&board) {
-            return Err("Invalid board".to_string());
+            return Err(anyhow::anyhow!("Invalid board"));
         }
 
         Ok(Self { board })
     }
-
     pub fn solve(&mut self) -> bool {
         for row in 0..9 {
             for col in 0..9 {
@@ -41,10 +40,10 @@ impl Sudoku {
         !input.chars().all(|c| c.is_digit(10))
     }
 
-    pub fn from_string(input: &str) -> std::result::Result<Self, String> {
+    pub fn from_string(input: &str) -> Result<Self> {
         const SUDOKU_BOARD: usize = 9 * 9;
         if input.len() != SUDOKU_BOARD || Self::contains_non_digit(input) {
-            return Err("Invalid input string".to_string());
+            return Err(anyhow::anyhow!("Invalid input string"));
         }
 
         let board = input
@@ -67,14 +66,15 @@ impl Sudoku {
     }
 
     pub fn from_json_file(file_path: &str) -> Result<Self> {
-        let mut file = File::open(file_path).map_err(|e| serde_json::Error::custom(e.to_string()))?;
+        let mut file = File::open(file_path).context("Failed to open the file")?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)
-            .map_err(|e| serde_json::Error::custom(e.to_string()))?;
-        
-        let sudoku: Sudoku = serde_json::from_str(&contents)?;
+            .context("Failed to read the file")?;
+
+        let sudoku: Sudoku = serde_json::from_str(&contents).context("Failed to parse JSON")?;
+
         if !Validator::is_valid_board(&sudoku.board) {
-            return Err(serde_json::Error::custom("Invalid board"));
+            return Err(anyhow::anyhow!("Invalid board"));
         }
         Ok(sudoku)
     }
