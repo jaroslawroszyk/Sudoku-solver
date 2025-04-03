@@ -87,7 +87,6 @@ fn test_from_single_board_in_json() {
     }
 }
 
-
 #[allow(dead_code)]
 fn test_from_multiple_board_in_json() {
     let mut sudoku_boards: Vec<Sudoku> =
@@ -104,8 +103,8 @@ fn test_from_multiple_board_in_json() {
 }
 
 fn main() {
-    test_from_single_board_in_json();
-    // test_from_multiple_board_in_json();
+    // test_from_single_board_in_json();
+    test_from_multiple_board_in_json();
     // test_sudoku_str_1_solution();
     // test_with_board_1();
     // test_with_board_2();

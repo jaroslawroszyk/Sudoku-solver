@@ -94,14 +94,22 @@ impl Sudoku {
             return Err(anyhow::anyhow!("No Sudoku boards found in the file"));
         }
 
-        if !sudoku_boards
-            .iter()
-            .all(|sudoku| Validator::is_valid_board(&sudoku.board))
-        {
-            return Err(anyhow::anyhow!("Invalid board"));
+        let mut valid_boards: Vec<Sudoku> = sudoku_boards
+            .into_iter()
+            .filter(|sudoku| Validator::is_valid_board(&sudoku.board))
+            .collect();
+
+        if valid_boards.is_empty() {
+            return Err(anyhow::anyhow!("No valid Sudoku boards found"));
         }
 
-        Ok(sudoku_boards)
+        for sudoku in valid_boards.iter_mut() {
+            if !sudoku.solve() {
+                return Err(anyhow::anyhow!("Failed to solve a valid Sudoku board"));
+            }
+        }
+
+        Ok(valid_boards)
     }
 }
 
