@@ -89,8 +89,11 @@ fn main() {
 
     let _multiple_boards = "inputs/multiple_boards.json";
 
+    let _empty = "inputs/empty.json";
+
     // test_from_json_with(_single_board);
     test_from_json_with(_multiple_boards);
+    test_from_json_with(_empty);
 
     // test_from_multiple_board_in_json();
 

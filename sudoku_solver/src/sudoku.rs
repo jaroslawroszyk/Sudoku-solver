@@ -80,10 +80,11 @@ impl Sudoku {
     }
 
     pub fn solve_sudoku_boards_from_json(file_path: &str) -> Result<Vec<Sudoku>> {
-        let contents = match Self::open_file(file_path) {
-            Ok(contents) => contents,
-            Err(err) => return Err(anyhow::anyhow!("Error reading the file: {}", err)),
-        };
+        let contents = Self::open_file(file_path)?;
+
+        if contents.trim().is_empty() {
+            return Err(anyhow::anyhow!("File '{}' is empty", file_path));
+        }
 
         let sudoku_boards: Vec<Sudoku> = match serde_json::from_str(&contents) {
             Ok(parsed) => parsed,
@@ -98,15 +99,11 @@ impl Sudoku {
 
         for (i, sudoku) in sudoku_boards.into_iter().enumerate() {
             if Validator::is_valid_board(&sudoku.board) {
-                let mut solved_sudoku = sudoku;
-                if solved_sudoku.solve() {
+                if let Some(solved_sudoku) = Self::solve_sudoku(sudoku) {
                     valid_boards.push(solved_sudoku);
                     println!("Sudoku #{} solved successfully.", i + 1);
                 } else {
-                    eprintln!(
-                        "Error: Sudoku #{} is valid but unsolvable, skipping.",
-                        i + 1
-                    );
+                    eprintln!("Error: Sudoku #{} is valid but unsolvable, skipping.", i + 1);
                 }
             } else {
                 eprintln!("Error: Sudoku #{} is invalid, skipping.", i + 1);
@@ -118,6 +115,15 @@ impl Sudoku {
         }
 
         Ok(valid_boards)
+    }
+
+    
+    fn solve_sudoku(mut sudoku: Sudoku) -> Option<Sudoku> {
+        if sudoku.solve() {
+            Some(sudoku)
+        } else {
+            None
+        }
     }
 }
 
