@@ -2,7 +2,7 @@ use crate::json_handler;
 use crate::validator::Validator;
 use anyhow::Result;
 use serde::Deserialize;
-use std::{fmt, io::Read};
+use std::fmt;
 
 #[derive(Debug, Deserialize)]
 pub struct Sudoku {
@@ -65,19 +65,6 @@ impl Sudoku {
             .flatten()
             .map(|&n| n.to_string())
             .collect()
-    }
-
-    fn open_file(file_path: &str) -> Result<String> {
-        match std::fs::File::open(file_path) {
-            Ok(mut file) => {
-                let mut contents = String::new();
-                match file.read_to_string(&mut contents) {
-                    Ok(_) => Ok(contents),
-                    Err(err) => Err(anyhow::anyhow!("Failed to read the file: {}", err)),
-                }
-            }
-            Err(err) => Err(anyhow::anyhow!("Failed to open the file: {}", err)),
-        }
     }
 
     pub fn solve_sudoku_boards_from_json(file_path: &str) -> Result<Vec<Sudoku>> {
@@ -226,24 +213,6 @@ mod tests {
         let mut file = File::create(&file_path)?;
         file.write_all(contents.as_bytes())?;
         Ok(file_path.to_str().unwrap().to_string())
-    }
-
-    #[test]
-    fn test_open_file_success() {
-        let contents = r#"[
-            {"board": [[5, 3, 0, 0, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0], [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3], [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6], [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5], [0, 0, 0, 0, 8, 0, 0, 7, 9]]}
-        ]"#;
-        let file_path = create_temp_file(contents).expect("Failed to create temp file");
-
-        let result = Sudoku::open_file(&file_path);
-        assert!(result.is_ok(), "Expected file to open successfully");
-    }
-
-    #[test]
-    fn test_open_file_not_found() {
-        let file_path = "/non/existent/path.json";
-        let result = Sudoku::open_file(file_path);
-        assert!(result.is_err(), "Expected error for non-existent file");
     }
 
     #[test]

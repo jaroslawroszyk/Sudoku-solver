@@ -35,15 +35,14 @@ mod tests {
     fn test_read_file() {
         let content = r#"[{"board": [[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]]}]"#;
         let path = "test_sudoku.json";
-        
+
         let mut file = File::create(path).unwrap();
         file.write_all(content.as_bytes()).unwrap();
-        
+
         let result = read_file(path);
         assert!(result.is_ok());
 
         remove_file(path).unwrap();
-
     }
 
     #[test]
@@ -70,11 +69,15 @@ mod tests {
                     [0, 0, 0, 0, 8, 0, 0, 7, 9]
                 ]
             "#; // Brakujący nawias zamykający
-    
+
         let result = parse_sudoku_boards(invalid_json);
-    
+
         if let Err(e) = result {
-            assert!(e.to_string().contains("invalid type: map"), "Unexpected error: {}", e);
+            assert!(
+                e.to_string().contains("invalid type: map"),
+                "Unexpected error: {}",
+                e
+            );
         } else {
             panic!("Expected error, but got Ok!");
         }
@@ -91,7 +94,13 @@ mod tests {
         let result = parse_sudoku_boards(content);
         remove_file(path).unwrap();
 
-        assert!(result.is_err(), "Expected error when no Sudoku boards are found");
-        assert_eq!(result.unwrap_err().to_string(), "No Sudoku boards found in the file");
+        assert!(
+            result.is_err(),
+            "Expected error when no Sudoku boards are found"
+        );
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "No Sudoku boards found in the file"
+        );
     }
 }

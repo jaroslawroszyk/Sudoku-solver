@@ -22,6 +22,15 @@ fn test_sudoku_str_1_solution() {
     solve_sudoku_from_string(input, expected_output);
 }
 
+#[allow(dead_code)]
+fn test_sudoku_str_2_solution() {
+    let input = "000000000603140500902500807520090614300000000001005209730800000009000006060010070";
+    let expected_output =
+        "475289163683147592912563847527398614396421758841675239734856921159732486268914375";
+
+    solve_sudoku_from_string(input, expected_output);
+}
+
 fn test_with_board(board: Vec<Vec<u8>>) {
     let mut sudoku = match Sudoku::new(board) {
         Ok(sudoku) => sudoku,
@@ -93,12 +102,13 @@ fn main() {
     let _empty = "inputs/empty.json";
 
     // test_from_json_with(_single_board);
-    test_from_json_with(_multiple_boards);
-    test_from_json_with(_empty);
+    // test_from_json_with(_multiple_boards);
+    // test_from_json_with(_empty);
 
     // test_from_multiple_board_in_json();
 
     // test_sudoku_str_1_solution();
+    test_sudoku_str_1_solution();
     // test_with_board_1();
     // test_with_board_2();
 }
