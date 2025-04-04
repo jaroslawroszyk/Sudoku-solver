@@ -68,7 +68,7 @@ mod tests {
                     [0, 0, 0, 4, 1, 9, 0, 0, 5],
                     [0, 0, 0, 0, 8, 0, 0, 7, 9]
                 ]
-            "#; // Brakujący nawias zamykający
+            "#;
 
         let result = parse_sudoku_boards(invalid_json);
 
