@@ -3,7 +3,10 @@ mod solvers;
 mod sudoku;
 mod validator;
 use anyhow::Result;
-use solvers::{backtracking::BacktrackingSolver, solver::Solver};
+use solvers::{
+    backtracking::BacktrackingSolver,
+    solver::{Solver, SolverKind, solve_with_strategy},
+};
 
 use sudoku::Sudoku;
 use validator::Validator;
@@ -58,11 +61,26 @@ fn solve_sudoku_from_string<BS: Solver>(input: &str, expected_output: &str) {
     println!("Sudoku solved correctly!");
 }
 
+fn solve_with_strategy_test(kind: SolverKind, input: &str, expected_output: &str) {
+    let mut sudoku = Sudoku::from_string(input).expect("Invalid Sudoku");
+
+    solve_with_strategy(&mut sudoku, kind).expect("Failed to solve Sudoku");
+
+    let solved_sudoku_str = sudoku.to_string();
+    assert_eq!(
+        solved_sudoku_str, expected_output,
+        "The solution doesn't fit!"
+    );
+
+    println!("Sudoku solved correctly!");
+}
+
 fn main() {
     let input = "050000024904005000876240000010002080300000750409017200000900000247000000000600032";
     let expected_output =
         "153786924924135678876249315715362489362498751489517263638921547247853196591674832";
     solve_sudoku_from_string::<BacktrackingSolver>(input, expected_output);
+    solve_with_strategy_test(SolverKind::Backtracking, input, expected_output);
 }
 
 #[cfg(test)]
@@ -79,6 +97,15 @@ mod tests {
             "The solution doesn't fit!"
         );
         println!("Sudoku solved correctly!");
+    }
+
+    #[test]
+    fn test_strategy_easy_sudoku_from_string_backtracking_solution() {
+        let input =
+            "050000024904005000876240000010002080300000750409017200000900000247000000000600032";
+        let expected_output =
+            "153786924924135678876249315715362489362498751489517263638921547247853196591674832";
+        solve_with_strategy_test(SolverKind::Backtracking, input, expected_output);
     }
 
     #[test]
