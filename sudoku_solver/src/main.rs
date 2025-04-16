@@ -49,8 +49,7 @@ pub fn solve_sudoku_boards_from_json(file_path: &str) -> Result<Vec<Sudoku>> {
 fn solve_sudoku_from_string<BS: Solver>(input: &str, expected_output: &str) {
     let mut sudoku = Sudoku::from_string(input).expect("Invalid Sudoku");
 
-    BS::solve(&mut sudoku)
-        .expect("Failed to solve Sudoku");
+    BS::solve(&mut sudoku).expect("Failed to solve Sudoku");
     let solved_sudoku_str = sudoku.to_string();
     assert_eq!(
         solved_sudoku_str, expected_output,
