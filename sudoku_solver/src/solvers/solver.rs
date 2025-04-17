@@ -21,7 +21,6 @@ pub fn solve_with_strategy(board: &mut Sudoku, kind: SolverKind) -> anyhow::Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Sudoku, solvers::backtracking::BacktrackingSolver};
 
     #[test]
     fn test_solve_using_backtracking() {

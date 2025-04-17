@@ -81,6 +81,7 @@ fn main() {
         "153786924924135678876249315715362489362498751489517263638921547247853196591674832";
     solve_sudoku_from_string::<BacktrackingSolver>(input, expected_output);
     solve_with_strategy_test(SolverKind::Backtracking, input, expected_output);
+    solve_with_strategy_test(SolverKind::Heuristic, input, expected_output);
 }
 
 #[cfg(test)]
@@ -106,6 +107,15 @@ mod tests {
         let expected_output =
             "153786924924135678876249315715362489362498751489517263638921547247853196591674832";
         solve_with_strategy_test(SolverKind::Backtracking, input, expected_output);
+    }
+
+    #[test]
+    fn test_strategy_easy_sudoku_from_string_heuristic_solution() {
+        let input =
+            "050000024904005000876240000010002080300000750409017200000900000247000000000600032";
+        let expected_output =
+            "153786924924135678876249315715362489362498751489517263638921547247853196591674832";
+        solve_with_strategy_test(SolverKind::Heuristic, input, expected_output);
     }
 
     #[test]
