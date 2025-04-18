@@ -103,4 +103,38 @@ mod tests {
             "No Sudoku boards found in the file"
         );
     }
+
+    #[test]
+    fn test_read_file_nonexistent_path() {
+        let result = read_file("nonexistent_file.json");
+        assert!(result.is_err());
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Failed to open the file"),
+            "Unexpected error message"
+        );
+    }
+
+    #[test]
+    fn test_parse_invalid_sudoku_structure() {
+        let bad_structure = r#"[{"not_board": [[1,2,3],[4,5,6],[7,8,9]]}]"#;
+        let result = parse_sudoku_boards(bad_structure);
+        assert!(result.is_err());
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Failed to parse JSON"),
+            "Expected JSON parsing error"
+        );
+    }
+
+    #[test]
+    fn test_parse_garbage_input() {
+        let garbage = "this is not even JSON";
+        let result = parse_sudoku_boards(garbage);
+        assert!(result.is_err());
+    }
 }
