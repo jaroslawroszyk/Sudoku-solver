@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn test_is_invalid() {
         let invalid_board = vec![
-            vec![5, 3, 3, 0, 7, 0, 0, 0, 0], // Powtórzenie 3 w pierwszym wierszu
+            vec![5, 3, 3, 0, 7, 0, 0, 0, 0],
             vec![6, 0, 0, 1, 9, 5, 0, 0, 0],
             vec![0, 9, 8, 0, 0, 0, 0, 6, 0],
             vec![8, 0, 0, 0, 6, 0, 0, 0, 3],

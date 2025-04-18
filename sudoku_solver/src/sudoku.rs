@@ -48,10 +48,10 @@ impl Sudoku {
     }
 }
 
-/// Implementing the Deref and DerefMut traits allows us to use Sudoku as a slice
-/// of Vec<Vec<u8>>. This is useful for passing the Sudoku instance to functions
-/// that expect a slice, such as the `solve` method in the Solver trait.
-/// This allows us to use Sudoku as a slice of Vec<Vec<u8>>. This is useful for passing the Sudoku instance to functions
+// Implementing the Deref and DerefMut traits allows us to use Sudoku as a slice
+// of Vec<Vec<u8>>. This is useful for passing the Sudoku instance to functions
+// that expect a slice, such as the `solve` method in the Solver trait.
+// This allows us to use Sudoku as a slice of Vec<Vec<u8>>. This is useful for passing the Sudoku instance to functions
 impl Deref for Sudoku {
     type Target = Vec<Vec<u8>>;
 
@@ -117,61 +117,4 @@ mod tests {
         let result = Sudoku::new(invalid_board_with_duplicates);
         assert!(result.is_err(), "Expected error for invalid board");
     }
-
-    //todo add more tests
 }
-
-//     fn create_temp_file(contents: &str) -> std::io::Result<String> {
-//         let tmp_dir = std::env::temp_dir();
-//         let file_path = tmp_dir.join("test_sudoku.json");
-//         let mut file = File::create(&file_path)?;
-//         file.write_all(contents.as_bytes())?;
-//         Ok(file_path.to_str().unwrap().to_string())
-//     }
-
-//     #[test]
-//     fn test_empty_file() {
-//         let contents = "";
-//         let file_path = create_temp_file(contents).expect("Failed to create temp file");
-
-//         let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
-//         assert!(result.is_err(), "Expected error due to empty file");
-//     }
-
-//     #[test]
-//     fn test_file_with_no_sudoku_boards() {
-//         let contents = r#"[]"#;
-//         let file_path = create_temp_file(contents).expect("Failed to create temp file");
-
-//         let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
-//         assert!(result.is_err(), "Expected error due to no Sudoku boards");
-//     }
-
-//     #[test]
-//     fn test_file_with_invalid_sudoku_boards() {
-//         let contents = r#"[
-//                 {"board": [[5, 3, 5, 6, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0], [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3], [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6], [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5], [0, 0, 0, 0, 8, 0, 0, 7, 9]]}
-//             ]"#;
-//         let file_path = create_temp_file(contents).expect("Failed to create temp file");
-
-//         let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
-//         assert!(
-//             result.is_err(),
-//             "Expected error due to invalid Sudoku board"
-//         );
-//     }
-
-//     #[test]
-//     fn test_solve_sudoku_boards() {
-//         let contents = r#"[
-//                 {"board": [[5, 3, 0, 0, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0], [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3], [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6], [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5], [0, 0, 0, 0, 8, 0, 0, 7, 9]]}
-//             ]"#;
-//         let file_path = create_temp_file(contents).expect("Failed to create temp file");
-
-//         let result = Sudoku::solve_sudoku_boards_from_json(&file_path);
-//         assert!(
-//             result.is_ok(),
-//             "Expected to solve Sudoku boards successfully"
-//         );
-//     }
-// }
