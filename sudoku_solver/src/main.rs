@@ -3,6 +3,7 @@ mod solvers;
 mod sudoku;
 mod validator;
 use anyhow::Result;
+use input::boardsource::{detect_format_from_path, load_boards_by_format};
 use solvers::{
     backtracking::BacktrackingSolver,
     solver::{Solver, SolverKind, solve_with_strategy},
@@ -10,10 +11,11 @@ use solvers::{
 use sudoku::Sudoku;
 use validator::Validator;
 
-pub fn solve_sudoku_boards_from_file<S: input::boardsource::BoardSource>(
-    file_path: &str,
-) -> Result<Vec<Sudoku>> {
-    let sudoku_boards = S::load_from_file(file_path)?;
+pub fn solve_sudoku_boards_from_file(file_path: &str) -> Result<Vec<Sudoku>> {
+    let format = detect_format_from_path(file_path)
+        .ok_or_else(|| anyhow::anyhow!("Unsupported file format"))?;
+
+    let sudoku_boards = load_boards_by_format(format, file_path)?;
 
     let mut valid_boards = Vec::new();
 
@@ -69,20 +71,65 @@ fn solve_with_strategy_test(kind: SolverKind, input: &str, expected_output: &str
     println!("Sudoku solved correctly!");
 }
 
-fn main() {
+fn solve_sudoku_from_different_paths() -> Result<()> {
+    let file_paths = vec!["inputs/first.json", "inputs/first.csv"];
+
+    file_paths
+        .iter()
+        .map(|path| {
+            println!("==> Processing file: {}", path);
+
+            let format = detect_format_from_path(path)
+                .ok_or_else(|| anyhow::anyhow!("Could not detect format from path: {}", path))?;
+
+            let boards = load_boards_by_format(format, path)?;
+
+            let _ = boards
+                .into_iter()
+                .enumerate()
+                .filter_map(|(i, mut board)| {
+                    if Validator::is_valid_board(&board) {
+                        match BacktrackingSolver::solve(&mut board) {
+                            Ok(_) => {
+                                println!("Sudoku #{} solved successfully.\n{}", i + 1, board);
+                                Some(board)
+                            }
+                            Err(e) => {
+                                eprintln!("Sudoku #{} could not be solved: {:?}", i + 1, e);
+                                None
+                            }
+                        }
+                    } else {
+                        eprintln!("Sudoku #{} is invalid, skipping.", i + 1);
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            println!();
+            Ok(())
+        })
+        .collect::<Result<()>>()?;
+
+    Ok(())
+}
+
+fn main() -> Result<()> {
     let input = "050000024904005000876240000010002080300000750409017200000900000247000000000600032";
     let expected_output =
         "153786924924135678876249315715362489362498751489517263638921547247853196591674832";
     solve_sudoku_from_string::<BacktrackingSolver>(input, expected_output);
     solve_with_strategy_test(SolverKind::Backtracking, input, expected_output);
     solve_with_strategy_test(SolverKind::Heuristic, input, expected_output);
+
+    solve_sudoku_from_different_paths()?;
+
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use std::io::Write;
-
-    use crate::input::{csv_handler::CsvHandler, json_handler::JsonHandler};
 
     use super::*;
 
@@ -149,7 +196,7 @@ mod tests {
     fn test_solve_single_valid_board_from_json() {
         let path = "inputs/first.json";
 
-        let result = solve_sudoku_boards_from_file::<JsonHandler>(path);
+        let result = solve_sudoku_boards_from_file(path);
 
         assert!(result.is_ok(), "Expected a valid solution, got error");
 
@@ -162,7 +209,7 @@ mod tests {
     fn test_solve_single_valid_board_from_csv() {
         let path = "inputs/first.csv";
 
-        let result = solve_sudoku_boards_from_file::<CsvHandler>(path);
+        let result = solve_sudoku_boards_from_file(path);
         assert!(result.is_ok(), "Expected a valid solution, got error");
 
         let solved_boards = result.unwrap();
@@ -174,7 +221,7 @@ mod tests {
     fn test_solve_multiple_boards_from_json() {
         let path = "inputs/multiple_boards.json";
 
-        let result = solve_sudoku_boards_from_file::<JsonHandler>(path);
+        let result = solve_sudoku_boards_from_file(path);
         assert!(result.is_ok(), "Expected valid solutions, got error");
 
         let solved_boards = result.unwrap();
@@ -188,7 +235,7 @@ mod tests {
     fn test_empty_json_file() {
         let path = "inputs/empty.json";
 
-        let result = solve_sudoku_boards_from_file::<JsonHandler>(path);
+        let result = solve_sudoku_boards_from_file(path);
         assert!(result.is_err(), "Expected error for empty file");
     }
 
@@ -196,7 +243,7 @@ mod tests {
     fn test_empty_csv_file() {
         let path = "inputs/empty.csv";
 
-        let result = solve_sudoku_boards_from_file::<CsvHandler>(path);
+        let result = solve_sudoku_boards_from_file(path);
         assert!(result.is_err(), "Expected error for empty file");
     }
 
@@ -204,7 +251,7 @@ mod tests {
     fn test_invalid_json_format() {
         let path = "inputs/invalid.json";
 
-        let result = solve_sudoku_boards_from_file::<JsonHandler>(path);
+        let result = solve_sudoku_boards_from_file(path);
         assert!(result.is_err(), "Expected error for invalid JSON format");
     }
 
@@ -223,7 +270,7 @@ mod tests {
             ]"#;
         let file_path = create_temp_file(contents).expect("Failed to create temp file");
 
-        let result = solve_sudoku_boards_from_file::<JsonHandler>(&file_path);
+        let result = solve_sudoku_boards_from_file(&file_path);
         assert!(
             result.is_ok(),
             "Expected to solve Sudoku boards successfully"
@@ -237,7 +284,7 @@ mod tests {
             ]"#;
         let file_path = create_temp_file(contents).expect("Failed to create temp file");
 
-        let result = solve_sudoku_boards_from_file::<JsonHandler>(&file_path);
+        let result = solve_sudoku_boards_from_file(&file_path);
         assert!(
             result.is_err(),
             "Expected error due to invalid Sudoku board"
@@ -249,7 +296,7 @@ mod tests {
         let contents = r#"[]"#;
         let file_path = create_temp_file(contents).expect("Failed to create temp file");
 
-        let result = solve_sudoku_boards_from_file::<JsonHandler>(&file_path);
+        let result = solve_sudoku_boards_from_file(&file_path);
         assert!(result.is_err(), "Expected error due to no Sudoku boards");
     }
 }

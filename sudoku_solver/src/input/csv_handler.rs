@@ -3,12 +3,10 @@ use anyhow::{Context, Result};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-use super::boardsource::BoardSource;
-
 pub struct CsvHandler;
 
-impl BoardSource for CsvHandler {
-    fn load_from_file(path: &str) -> Result<Vec<Sudoku>> {
+impl CsvHandler {
+    pub fn load_from_file(path: &str) -> Result<Vec<Sudoku>> {
         let file =
             File::open(path).with_context(|| format!("Failed to open CSV file: {}", path))?;
         let reader = BufReader::new(file);

@@ -4,12 +4,10 @@ use serde_json;
 use std::fs::File;
 use std::io::Read;
 
-use super::boardsource::BoardSource;
-
 pub struct JsonHandler;
 
-impl BoardSource for JsonHandler {
-    fn load_from_file(path: &str) -> Result<Vec<Sudoku>> {
+impl JsonHandler {
+    pub fn load_from_file(path: &str) -> Result<Vec<Sudoku>> {
         let contents = read_file(path)?;
         let sudoku_boards: Vec<Sudoku> = serde_json::from_str(&contents)
             .map_err(|err| anyhow!("Failed to parse JSON: {}", err))?;
