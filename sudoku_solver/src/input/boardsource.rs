@@ -20,3 +20,21 @@ pub trait BoardSource {
 //         FileFormat::Xml => XmlHandler::load_from_file(path),
 //     }
 // }
+
+/*
+pub fn detect_format_from_path(path: &str) -> Option<FileFormat> {
+    if path.ends_with(".json") {
+        Some(FileFormat::Json)
+    } else if path.ends_with(".csv") {
+        Some(FileFormat::Csv)
+    } else if path.ends_with(".xml") {
+        Some(FileFormat::Xml)
+    } else {
+        None
+    }
+}
+    if let Some(format) = detect_format_from_path(file_path) {
+    let boards = load_boards_by_format(format, file_path)?;
+}
+
+*/

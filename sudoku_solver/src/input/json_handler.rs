@@ -11,7 +11,6 @@ pub struct JsonHandler;
 impl BoardSource for JsonHandler {
     fn load_from_file(path: &str) -> Result<Vec<Sudoku>> {
         let contents = read_file(path)?;
-        // parse_sudoku_boards(&contents)
         let sudoku_boards: Vec<Sudoku> = serde_json::from_str(&contents)
             .map_err(|err| anyhow!("Failed to parse JSON: {}", err))?;
 

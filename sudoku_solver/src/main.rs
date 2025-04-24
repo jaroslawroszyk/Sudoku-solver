@@ -82,7 +82,7 @@ fn main() {
 mod tests {
     use std::io::Write;
 
-    use crate::input::json_handler::JsonHandler;
+    use crate::input::{csv_handler::CsvHandler, json_handler::JsonHandler};
 
     use super::*;
 
@@ -159,6 +159,18 @@ mod tests {
     }
 
     #[test]
+    fn test_solve_single_valid_board_from_csv() {
+        let path = "inputs/first.csv";
+
+        let result = solve_sudoku_boards_from_file::<CsvHandler>(path);
+        assert!(result.is_ok(), "Expected a valid solution, got error");
+
+        let solved_boards = result.unwrap();
+        assert_eq!(solved_boards.len(), 1, "Expected 1 solved board");
+        println!("Solved Sudoku: \n{}", solved_boards[0]);
+    }
+
+    #[test]
     fn test_solve_multiple_boards_from_json() {
         let path = "inputs/multiple_boards.json";
 
@@ -177,6 +189,14 @@ mod tests {
         let path = "inputs/empty.json";
 
         let result = solve_sudoku_boards_from_file::<JsonHandler>(path);
+        assert!(result.is_err(), "Expected error for empty file");
+    }
+
+    #[test]
+    fn test_empty_csv_file() {
+        let path = "inputs/empty.csv";
+
+        let result = solve_sudoku_boards_from_file::<CsvHandler>(path);
         assert!(result.is_err(), "Expected error for empty file");
     }
 
